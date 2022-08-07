@@ -1,0 +1,12 @@
+<app-header></app-header>
+<main class="relative flex-1">
+	<app-card title="select currency">
+		<app-currency-form [selectedBase]="currencyService.inputBase" [amount]="currencyService.inputAmount"
+			(selectBase)="currencyService.setInputBase($event)" (changeAmount)="currencyService.setOutputAmount($event)">
+		</app-currency-form>
+		<p class="text-center font-bold my-2">equal</p>
+		<app-currency-form [selectedBase]="currencyService.outputBase" [amount]="currencyService.outputAmount"
+			(selectBase)="currencyService.setOutputBase($event)" (changeAmount)="currencyService.setInputAmount($event)">
+		</app-currency-form>
+	</app-card>
+</main>

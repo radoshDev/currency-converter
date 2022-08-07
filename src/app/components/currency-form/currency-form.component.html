@@ -1,0 +1,12 @@
+<div
+	class="border p-px rounded flex justify-between focus-within:border-2 focus-within:border-blue-600 focus-within:p-0">
+	<input type="number" [(ngModel)]="amount" (ngModelChange)="changeAmount.emit($event)"
+		class="w-1/2 focus-visible:outline-none p-2">
+	<div class="relative w-1/2 pr-1">
+		<span class="absolute w-px bg-slate-300 top-1 bottom-1"></span>
+		<select [(ngModel)]="selectedBase" (ngModelChange)="selectBase.emit($event)"
+			class="w-full block p-2 mr-2 cursor-pointer focus-visible:outline-none">
+			<option *ngFor="let currency of currencyService.currencies" [value]="currency.base">{{currency.base}}</option>
+		</select>
+	</div>
+</div>
