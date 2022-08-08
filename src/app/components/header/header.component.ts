@@ -11,16 +11,12 @@ export class HeaderComponent implements OnInit {
 		{ base: 'USD', symbol: '$', amount: 0 },
 		{ base: 'EUR', symbol: '€', amount: 0 },
 	]
-	isLoading = false
-	constructor(private currencyService: CurrencyService) {}
+	constructor(public currencyService: CurrencyService) {}
 
 	ngOnInit(): void {
-		this.isLoading = true
 		this.currencyService.getAllRates('EUR').subscribe(res => {
-			console.log(res)
 			this.setCurrency('EUR', res.rates)
 			this.setCurrency('USD', res.rates)
-			this.isLoading = false
 		})
 	}
 	setCurrency(base: Base, rates: Rates): void {

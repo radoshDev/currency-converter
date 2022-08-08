@@ -1,4 +1,7 @@
 <div class="max-w-lg w-full shadow-md rounded p-6 bg-white mt-40 mx-auto">
 	<h2 class="text-center text-xl font-semibold mb-4">{{title | titlecase}}</h2>
-	<ng-content></ng-content>
+	<div [ngSwitch]="true">
+		<p *ngSwitchCase="!!errorMessage" class="text-red-500 text-xl text-center">{{errorMessage}}</p>
+		<ng-content *ngSwitchCase="!errorMessage"></ng-content>
+	</div>
 </div>

@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { delay, tap } from 'rxjs'
+import { catchError, delay, tap, throwError } from 'rxjs'
 import { Base, Currency, CurrencyResponse, Rates } from '../types/currency'
 
 const baseUrl = 'https://api.exchangeratesapi.io/v1/latest'
@@ -15,7 +15,8 @@ export class CurrencyService {
 	private _outputAmount: number = 1
 	private _inputBase: Base = 'EUR'
 	private _outputBase: Base = 'UAH'
-
+	isLoading = false
+	errorMessage = ''
 	constructor(private http: HttpClient) {}
 
 	get currencies() {
@@ -43,32 +44,35 @@ export class CurrencyService {
 		return this._outputBase
 	}
 
-	setInputAmount(amount: number) {
-		const outputRate = this.getSpecificRate(this.inputBase, this.outputBase)
-		this.inputAmount = amount / outputRate
+	handleInputAmount(amount: number) {
+		const rate = this.getSpecificRate(this.inputBase, this.outputBase)
+		if (!amount) amount = 0
+		this.inputAmount = amount
+		this.outputAmount = amount * rate
 	}
-	setOutputAmount(amount: number) {
-		const outputRate = this.getSpecificRate(this.inputBase, this.outputBase)
-		this.outputAmount = amount * outputRate
+	handleOutputAmount(amount: number) {
+		const rate = this.getSpecificRate(this.inputBase, this.outputBase)
+		if (!amount) amount = 0
+		this.outputAmount = amount
+		this.inputAmount = amount / rate
 	}
 
-	setInputBase(base: Base) {
+	handleInputBase(base: Base) {
 		const rate = this.getSpecificRate(base, this.outputBase)
-		console.log(rate)
 
 		this._inputBase = base
-		this.outputAmount = this._inputAmount * rate
+		this.outputAmount = this.inputAmount * rate
 	}
 
-	setOutputBase(base: Base) {
+	handleOutputBase(base: Base) {
 		const rate = this.getSpecificRate(this.inputBase, base)
-		console.log(rate)
 
 		this._outputBase = base
-		this.outputAmount = this._inputAmount * rate
+		this.outputAmount = this.inputAmount * rate
 	}
 
 	getAllRates(base: Base) {
+		this.isLoading = true
 		return this.http
 			.get<CurrencyResponse>(baseUrl, {
 				params: new HttpParams({
@@ -84,7 +88,10 @@ export class CurrencyService {
 					this._currencies = this.mappedCurrency(res.rates)
 					this._rates = res.rates
 					this.outputAmount = this.getSpecificRate(base, 'UAH')
-				})
+					this.isLoading = false
+					this.errorMessage = ''
+				}),
+				catchError(this.errorHandler.bind(this))
 			)
 	}
 
@@ -97,5 +104,11 @@ export class CurrencyService {
 			base,
 			amount: rates[base],
 		}))
+	}
+
+	private errorHandler(error: HttpErrorResponse) {
+		this.errorMessage = 'Problem to load service. Try again later.'
+		this.isLoading = false
+		return throwError(() => error.message)
 	}
 }
